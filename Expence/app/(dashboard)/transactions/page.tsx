@@ -211,13 +211,13 @@ export default function TransactionsPage() {
         <Card className="glass border-0 p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider">Income</p>
           <p className="text-xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">
-            +{formatCurrency(totalIncome, currency)}
+            {formatCurrency(totalIncome, currency)}
           </p>
         </Card>
         <Card className="glass border-0 p-4 col-span-2 sm:col-span-1">
           <p className="text-xs text-muted-foreground uppercase tracking-wider">Expenses</p>
           <p className="text-xl font-bold mt-1 text-rose-600 dark:text-rose-400">
-            -{formatCurrency(totalExpense, currency)}
+            {formatCurrency(totalExpense, currency)}
           </p>
         </Card>
       </div>

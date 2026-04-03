@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/theme-provider"
 import { useFinance } from "@/components/finance-provider"
 import { CategoryManager } from "@/components/category-manager"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

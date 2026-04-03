@@ -1,23 +1,17 @@
 "use client"
 
-import { Category } from "@/lib/finance-data"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Trash2, Edit2 } from "lucide-react"
 import { CategoryIcon } from "@/components/category-icon"
+import { ICategory } from "@/types"
 
 interface CategoryCardProps {
-  category: Category
-  onEdit: (category: Category) => void
-  onDelete: (id: string) => void
-  isDefault?: boolean
+  category: ICategory
 }
 
 export function CategoryCard({
-  category,
-  onEdit,
-  onDelete,
-  isDefault = false,
+  category
 }: CategoryCardProps) {
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow relative">
@@ -30,29 +24,23 @@ export function CategoryCard({
           </p>
         </div>
         <div className="flex gap-2 w-full justify-center">
-          {!isDefault && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(category)}
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(category.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-          {isDefault && (
-            <span className="text-xs bg-secondary/50 text-muted-foreground px-2 py-1 rounded">
-              Default
-            </span>
-          )}
+
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              // onClick={() => onEdit(category)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              // onClick={() => onDelete(category.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </>
         </div>
       </div>
     </Card>

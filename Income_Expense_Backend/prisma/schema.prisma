@@ -18,6 +18,8 @@ model User {
   name         String
   password     String
   currency     String        @default("BDT")
+  role         Role          @default(USER)
+  status       Status        @default(active)
   createdAt    DateTime      @default(now())
   transactions Transaction[]
   categories   Category[]
@@ -36,17 +38,26 @@ model Transaction {
 }
 
 model Category {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
   icon      String
   type      TransactionType
   color     String
-  isDefault Boolean @default(false)
   userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
 }
 
 enum TransactionType {
   INCOME
   EXPENSE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  active
+  blocked
 }

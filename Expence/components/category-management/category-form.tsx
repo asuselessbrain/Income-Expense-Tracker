@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Category, availableIcons } from "@/lib/finance-data"
+import { availableIcons } from "@/lib/finance-data"
 import {
-  Dialog,
-  DialogContent,
+  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -22,28 +21,48 @@ import {
 } from "@/components/ui/select"
 import { CategoryIcon } from "@/components/category-icon"
 import { availableColors } from "@/lib/finance-data"
+import { createCategory } from "@/services/category"
+import { toast } from "sonner"
 
-interface CategoryFormProps {
-  open: boolean
-  category?: Category
-  onSubmit: (data: Omit<Category, "id">) => void
-  onOpenChange: (open: boolean) => void
-}
 
-export function CategoryForm({
-  open,
-  category,
-  onSubmit,
-  onOpenChange,
-}: CategoryFormProps) {
-  const [name, setName] = useState(category?.name || "")
-  const [type, setType] = useState<"income" | "expense">(category?.type || "expense")
-  const [selectedIcon, setSelectedIcon] = useState(category?.icon || "Wallet")
-  const [selectedColor, setSelectedColor] = useState(category?.color || "bg-blue-500")
+export function CategoryForm() {
+  const [name, setName] = useState("")
+  const [type, setType] = useState<"INCOME" | "EXPENSE">("EXPENSE")
+  const [selectedIcon, setSelectedIcon] = useState("Wallet")
+  const [selectedColor, setSelectedColor] = useState("bg-blue-500")
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined)
+
+  // const handleAddCategory = (data: Omit<Category, "id">) => {
+  //   addCategory(data)
+  // }
+
+  // const handleUpdateCategory = (data: Omit<Category, "id">) => {
+  //   if (editingCategory) {
+  //     updateCategory(editingCategory.id, data)
+  //     setEditingCategory(undefined)
+  //   }
+  // }
+
+  // const handleEditCategory = (category: Category) => {
+  //   setEditingCategory(category)
+  //   setFormOpen(true)
+  // }
+
+  // const handleDeleteCategory = (id: string) => {
+  //   const hasTransactions = transactions.some((t) => t.categoryId === id)
+  //   if (hasTransactions) {
+  //     alert("Cannot delete this category because it has associated transactions.")
+  //     return
+  //   }
+  //   if (confirm("Are you sure you want to delete this category?")) {
+  //     deleteCategory(id)
+  //   }
+  // }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name) {
@@ -51,25 +70,31 @@ export function CategoryForm({
       return
     }
 
-    onSubmit({
+    const result = await createCategory({
       name,
       type,
       icon: selectedIcon,
       color: selectedColor,
     })
 
+    console.log(result)
+
+    if(result.success) {
+      toast.success(result.message || "Category created successfully")
+    } else {
+      toast.error(result.errorMessage || "Failed to create category")
+    }
+
     setName("")
-    setType("expense")
+    setType("EXPENSE")
     setSelectedIcon("Wallet")
     setSelectedColor("bg-blue-500")
-    onOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <div>
         <DialogHeader>
-          <DialogTitle>{category ? "Edit Category" : "Create Category"}</DialogTitle>
+          <DialogTitle>"Create Category"</DialogTitle>
           <DialogDescription>
             Create a new category for organizing your transactions
           </DialogDescription>
@@ -88,13 +113,13 @@ export function CategoryForm({
 
           <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
-            <Select value={type} onValueChange={(val) => setType(val as "income" | "expense")}>
+            <Select value={type} onValueChange={(val) => setType(val as "INCOME" | "EXPENSE")}>
               <SelectTrigger id="type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="income">Income</SelectItem>
-                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="INCOME">Income</SelectItem>
+                <SelectItem value="EXPENSE">Expense</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -168,17 +193,12 @@ export function CategoryForm({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">{category ? "Update" : "Create"}</Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit">Save changes</Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+        </div>
   )
 }

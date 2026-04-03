@@ -1,60 +1,17 @@
-"use client"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AddCategoryDialog } from "@/components/category-management/add-category-dialog"
+import { getCategory } from "@/services/category";
+import { CategoryCard } from "@/components/category-management/category-card";
+import { TabsContent } from "@radix-ui/react-tabs";
+import { Card } from "@/components/ui/card";
+import { ICategory } from "@/types";
 
-import { useState } from "react"
-import { useFinance } from "@/components/finance-provider"
-import { CategoryCard } from "@/components/category-management/category-card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus } from "lucide-react"
-import { Category } from "@/lib/finance-data"
-import { Card } from "@/components/ui/card"
-import { CategoryForm } from "@/components/category-management/category-form"
+export default async function CategoriesPage() {
 
-export default function CategoriesPage() {
-  const { categories, addCategory, updateCategory, deleteCategory, transactions } = useFinance()
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined)
+  const incomeCategories = await getCategory("INCOME");
 
-  const handleAddCategory = (data: Omit<Category, "id">) => {
-    addCategory(data)
-  }
+  const expenseCategories = await getCategory("EXPENSE");
 
-  const handleUpdateCategory = (data: Omit<Category, "id">) => {
-    if (editingCategory) {
-      updateCategory(editingCategory.id, data)
-      setEditingCategory(undefined)
-    }
-  }
-
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(category)
-    setFormOpen(true)
-  }
-
-  const handleDeleteCategory = (id: string) => {
-    const hasTransactions = transactions.some((t) => t.categoryId === id)
-    if (hasTransactions) {
-      alert("Cannot delete this category because it has associated transactions.")
-      return
-    }
-    if (confirm("Are you sure you want to delete this category?")) {
-      deleteCategory(id)
-    }
-  }
-
-  const handleFormClose = () => {
-    setFormOpen(false)
-    setEditingCategory(undefined)
-  }
-
-  const incomeCategories = categories.filter((c) => c.type === "income")
-  const expenseCategories = categories.filter((c) => c.type === "expense")
-
-  const defaultIncomeIds = ["salary", "freelance", "investments", "gifts", "other-income"]
-  const defaultExpenseIds = ["food", "transport", "shopping", "entertainment", "bills", "health", "education", "travel", "other-expense"]
-
-  const customIncomeCategories = incomeCategories.filter((c) => !defaultIncomeIds.includes(c.id))
-  const customExpenseCategories = expenseCategories.filter((c) => !defaultExpenseIds.includes(c.id))
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -65,18 +22,8 @@ export default function CategoriesPage() {
             Manage your transaction categories
           </p>
         </div>
-        <Button onClick={() => setFormOpen(true)} className="rounded-xl shadow-lg shadow-primary/25">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Category
-        </Button>
+        <AddCategoryDialog />
       </header>
-
-      <CategoryForm
-        open={formOpen}
-        category={editingCategory}
-        onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}
-        onOpenChange={handleFormClose}
-      />
 
       <Tabs defaultValue="income" className="w-full">
         <TabsList className="rounded-xl p-1 grid w-full grid-cols-2">
@@ -85,39 +32,18 @@ export default function CategoriesPage() {
         </TabsList>
 
         <TabsContent value="income" className="space-y-6 mt-6">
-          {incomeCategories.length > 0 ? (
+          {incomeCategories.data.length > 0 ? (
             <>
-              {customIncomeCategories.length > 0 && (
+              {incomeCategories.data.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Custom Categories</h3>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {customIncomeCategories.map((category) => (
-                      <CategoryCard
-                        key={category.id}
-                        category={category}
-                        onEdit={handleEditCategory}
-                        onDelete={handleDeleteCategory}
-                        isDefault={false}
-                      />
+                    {incomeCategories.data.map((category: ICategory) => (
+                      <CategoryCard key={category.id}
+                        category={category} />
                     ))}
                   </div>
                 </div>
               )}
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground">Default Categories</h3>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {incomeCategories.filter((c) => defaultIncomeIds.includes(c.id)).map((category) => (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      onEdit={handleEditCategory}
-                      onDelete={handleDeleteCategory}
-                      isDefault={true}
-                    />
-                  ))}
-                </div>
-              </div>
             </>
           ) : (
             <Card className="p-8 text-center">
@@ -127,26 +53,22 @@ export default function CategoriesPage() {
         </TabsContent>
 
         <TabsContent value="expense" className="space-y-6 mt-6">
-          {expenseCategories.length > 0 ? (
+          {expenseCategories.data.length > 0 ? (
             <>
-              {customExpenseCategories.length > 0 && (
+              {expenseCategories.data.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Custom Categories</h3>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {customExpenseCategories.map((category) => (
+                    {expenseCategories.data.map((category: ICategory) => (
                       <CategoryCard
                         key={category.id}
                         category={category}
-                        onEdit={handleEditCategory}
-                        onDelete={handleDeleteCategory}
-                        isDefault={false}
                       />
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground">Default Categories</h3>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {expenseCategories.filter((c) => defaultExpenseIds.includes(c.id)).map((category) => (
@@ -159,7 +81,7 @@ export default function CategoriesPage() {
                     />
                   ))}
                 </div>
-              </div>
+              </div> */}
             </>
           ) : (
             <Card className="p-8 text-center">
